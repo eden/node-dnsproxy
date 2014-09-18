@@ -6,7 +6,8 @@ var args = process.argv.slice(2),
     options;
 
 options = {
-    addresses: {}
+    addresses: {},
+    rewrites: {}
 };
 
 for (index = 0, count = args.length; index < count; index++) {
@@ -29,6 +30,18 @@ for (index = 0, count = args.length; index < count; index++) {
         case "-c": // -c true|false
             argv = getNextArgv();
             options.cache = argv === false || /^true|1$/i.test(argv) ? true : false;
+            break;
+        case "-r": // -r local:fully.qualified.com...
+            if (argv = getNextArgv()) {
+                do {
+                    parts = argv.split(":");
+                    if (parts.length === 2) {
+                        options.rewrites[parts[0]] = parts[1];
+                    }
+                } while (argv = getNextArgv());
+            } else {
+                printUsage();
+            }
             break;
         case "-a": // -a a.com:1.2.3.4 *.com:2.3.4.5 ...
             if (argv = getNextArgv()) {
@@ -96,16 +109,20 @@ function getNextArgv() {
 
 function printUsage() {
     console.error([
-        "Usage: dnsproxy [-?hv] [-b address] [-p port] [-c true|false] [-a domain1:ip1 [domain2:ip2 [...]]] [-f filename]",
+        "Usage: dnsproxy [-?hv] [-b address] [-p port] [-c true|false]",
+        "                [-a domain1:ip1 [domain2:ip2 [...]]]",
+        "                [-r nonfqdn:fqdn [nonfqdn2:fqdn2 [...]]]",
+        "                [-f filename]",
         "",
         "Options:",
-        "  -?,-h         : this help",
-        "  -v            : show version and exit",
-        "  -b address    : set bind address",
-        "  -p port       : set bind port(default: 53)",
-        "  -c true|false : enable/disable cache",
-        "  -a domain:ip  : add one or more DNS recode",
-        "  -f filename   : load options from file"
+        "  -?,-h            : this help",
+        "  -v               : show version and exit",
+        "  -b address       : set bind address",
+        "  -p port          : set bind port(default: 53)",
+        "  -c true|false    : enable/disable cache",
+        "  -a domain:ip     : add one or more DNS recode",
+        "  -r fragment:fqdn : rewrite fragment to fully-qualified domain name before resolving",
+        "  -f filename      : load options from file"
     ].join("\n"));
     process.exit(-1);
 }

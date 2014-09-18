@@ -15,16 +15,30 @@ dig @localhost a.com               # test the server, return 127.0.0.1
 ## Usage 使用
 
 ``` text
-Usage: dnsproxy [-?hv] [-b address] [-p port] [-c true|false] [-a domain1:ip1 [domain2:ip2 [...]]] [-f filename]
+Usage: dnsproxy [-?hv] [-b address] [-p port] [-c true|false]
+                [-a domain1:ip1 [domain2:ip2 [...]]]
+                [-r nonfqdn:fqdn [nonfqdn2:fqdn2 [...]]]
+                [-f filename]
 
 Options:
-  -?,-h         : this help
-  -v            : show version and exit
-  -b address    : set bind address
-  -p port       : set bind port(default: 53)
-  -c true|false : enable/disable cache
-  -a domain:ip  : add one or more DNS recode
-  -f filename   : load options from file
+  -?,-h            : this help
+  -v               : show version and exit
+  -b address       : set bind address
+  -p port          : set bind port(default: 53)
+  -c true|false    : enable/disable cache
+  -a domain:ip     : add one or more DNS recode
+  -r fragment:fqdn : rewrite fragment to fully-qualified domain name before resolving
+  -f filename      : load options from file
+```
+
+## Rewrite domains
+
+When `-r` is specified, node-dnsproxy will rewrite the fragment into the fully qualified
+domain name.
+
+``` shell
+sudo dnsproxy -r "*.network:some.other.domain.com" &
+dig @localhost xx.network        # return result for xx.some.other.domain.com
 ```
 
 ## Pan-analytic 泛解析

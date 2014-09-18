@@ -281,6 +281,7 @@ function Server(options) { // {{{
     this._bind = options.bind || false;
     this.port = parseInt(options.port) || DNS_SERVER_PORT;
     this.addresses = (options && options.addresses) || {};
+    this.rewrites = (options && options.rewrites) || {};
     this.cache = !! options.cache;
 
     dgram.Socket.call(this, "udp4", serverMessageHandler);
@@ -312,7 +313,7 @@ function serverMessageHandler(buf, rinfo) { // {{{
     var self = this,
         msg = new Message(buf),
         queries, length, index, item, domains, domain, key, parts,
-        addresses, address, answers, info;
+        addresses, rewrites, address, answers, info;
 
     //debug(rinfo.address, ":", "------ request ------");
 
@@ -330,6 +331,7 @@ function serverMessageHandler(buf, rinfo) { // {{{
 
     info = this.address();
     addresses = this.addresses;
+    rewrites = this.rewrites;
     answers = [];
     length = index = domains.length;
 
@@ -341,7 +343,11 @@ function serverMessageHandler(buf, rinfo) { // {{{
         //debug(rinfo.address, ":", "want", domain);
 
         while (true) {
-            if (addresses.hasOwnProperty(key)) { //尝试直接回复
+            if (rewrites.hasOwnProperty(key)) {
+                domain = domain.replace(parts.join('.'), '') + rewrites[key];
+                key = domain;
+                parts = domain.split(".");
+            } else if (addresses.hasOwnProperty(key)) { //尝试直接回复
                 address = addresses[key];
                 address = (address === "localhost" ? rinfo.address : (address === "proxyhost" ? info.address : address));
                 if (pushAnswer(domain, address)) {
