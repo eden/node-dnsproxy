@@ -282,6 +282,7 @@ function Server(options) { // {{{
     this.port = parseInt(options.port) || DNS_SERVER_PORT;
     this.addresses = (options && options.addresses) || {};
     this.rewrites = (options && options.rewrites) || {};
+    this.debug = options.debug;
     this.cache = !! options.cache;
 
     dgram.Socket.call(this, "udp4", serverMessageHandler);
@@ -340,11 +341,17 @@ function serverMessageHandler(buf, rinfo) { // {{{
         key = domain;
         parts = domain.split(".");
 
-        //debug(rinfo.address, ":", "want", domain);
+        if (this.debug) {
+            debug(rinfo.address, ":", "want", domain);
+        }
 
         while (true) {
             if (rewrites.hasOwnProperty(key)) {
+                var old = domain;
                 domain = domain.replace(parts.join('.'), '') + rewrites[key];
+                if (this.debug) {
+                    debug(old, "->", domain);
+                }
                 key = domain;
                 parts = domain.split(".");
             } else if (addresses.hasOwnProperty(key)) { //尝试直接回复

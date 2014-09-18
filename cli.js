@@ -13,6 +13,9 @@ options = {
 for (index = 0, count = args.length; index < count; index++) {
     argv = args[index];
     switch (argv.toLowerCase()) {
+        case "-d": // -d
+            options.debug = true;
+            break;
         case "-b": // -b 192.168.1.1
             if (argv = getNextArgv()) {
                 options.bind = argv;
